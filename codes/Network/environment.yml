@@ -1,0 +1,10 @@
+name: cifar10
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - cpuonly
+  - pytorch
+  - torchaudio
+  - torchvision
+prefix: /opt/anaconda3/envs/cifar10
