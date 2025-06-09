@@ -31,7 +31,7 @@ def get_cifar_loader(root='../data/', batch_size=128, train=True, shuffle=True, 
         [transforms.ToTensor(),
         normalize])
 
-    dataset = datasets.CIFAR10(root=root, train=train, download=True, transform=data_transforms)
+    dataset = datasets.CIFAR10(root=root, train=train, download=False, transform=data_transforms)
     if n_items > 0:
         dataset = PartialDataset(dataset, n_items)
 

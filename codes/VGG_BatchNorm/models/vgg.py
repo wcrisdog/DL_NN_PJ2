@@ -4,7 +4,7 @@ VGG
 import numpy as np
 from torch import nn
 
-from codes_for_pj.utils.nn import init_weights_
+from codes.VGG_BatchNorm.utils.nn import init_weights_
 
 # ## Models implementation
 def get_number_of_parameters(model):
@@ -179,8 +179,74 @@ class VGG_A_Dropout(nn.Module):
         x = self.classifier(x.view(-1, 512 * 1 * 1))
         return x
 
+class VGG_A_BatchNorm(nn.Module):
+    """VGG-A architecture with BatchNorm after every convolution (and optionally after each FC)."""
+    def __init__(self, inp_ch=3, num_classes=10, init_weights=True):
+        super().__init__()
+        # Convolutional feature extractor with BN
+        self.features = nn.Sequential(
+            # stage 1
+            nn.Conv2d(inp_ch, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(True),
+            nn.MaxPool2d(2,2),
+            # stage 2
+            nn.Conv2d(64, 128, 3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(True),
+            nn.MaxPool2d(2,2),
+            # stage 3
+            nn.Conv2d(128, 256, 3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(True),
+            nn.Conv2d(256, 256, 3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(True),
+            nn.MaxPool2d(2,2),
+            # stage 4
+            nn.Conv2d(256, 512, 3, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(True),
+            nn.Conv2d(512, 512, 3, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(True),
+            nn.MaxPool2d(2,2),
+            # stage 5
+            nn.Conv2d(512, 512, 3, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(True),
+            nn.Conv2d(512, 512, 3, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(True),
+            nn.MaxPool2d(2,2)
+        )
+
+        # Classifier with optional BN on the 512→512 layers
+        self.classifier = nn.Sequential(
+            nn.Linear(512*1*1, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(True),
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(True),
+            nn.Linear(512, num_classes)
+        )
+
+        if init_weights:
+            self._init_weights()   # uses init_weights_ from utils/nn.py
+
+    def _init_weights(self):
+        for m in self.modules():
+            init_weights_(m)
+
+    def forward(self, x):
+        x = self.features(x)
+        x = x.view(-1, 512*1*1)
+        return self.classifier(x)
+
 
 if __name__ == '__main__':
     print(get_number_of_parameters(VGG_A()))
     print(get_number_of_parameters(VGG_A_Light()))
     print(get_number_of_parameters(VGG_A_Dropout()))
+    print(get_number_of_parameters(VGG_A_BatchNorm()))

@@ -119,7 +119,7 @@ def main():
     val_loss_hist, val_acc_hist = [], []
 
     # Training & validation loops with checkpoint saving
-    for epoch in range(1, 2):
+    for epoch in range(1, 51):
         net.train()
         running_loss, correct, total = 0.0, 0, 0
         for inputs, targets in trainloader:
@@ -138,7 +138,7 @@ def main():
         train_loss_hist.append(train_loss)
         train_acc_hist.append(train_acc)
         print(f"Epoch {epoch}: Train Loss {train_loss:.4f}, Acc {100.*train_acc:.2f}%")
-        if epoch % 2 == 0:
+        if epoch % 5 == 0:
             torch.save(net.state_dict(), f"cifar_net_epoch{epoch}.pth")
 
         # Validation
